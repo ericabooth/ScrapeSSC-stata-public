@@ -2,6 +2,8 @@
 
 `scrapessc` is a small Stata/Python package for building a local catalog of SSC package metadata and for listing/installing user-written packages from SSC, STB, and Stata Journal software archives.
 
+#This is primarily useful for setting up an air-gapped machine that cannot download or access ado files from SSC, Stata Journal, or STB regularly.
+
 It has two pieces:
 
 - `scrapessc.py`: a fast, dependency-free Python scraper that retrieves browser-accessible SSC `.pkg` manifests concurrently and writes CSV/JSONL summaries.
