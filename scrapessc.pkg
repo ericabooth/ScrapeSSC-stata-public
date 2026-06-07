@@ -1,0 +1,26 @@
+v 3
+d 'SCRAPESSC': package metadata scraper and Stata wrapper for SSC, STB, and Stata Journal software
+d
+d scrapessc provides a Python-backed package metadata scraper plus Stata-side
+d utilities to list, install, and inspect package-hit histories for user-written
+d Stata packages.
+d
+d KW: ssc
+d KW: package metadata
+d KW: reproducibility
+d KW: Stata Journal
+d KW: Stata Technical Bulletin
+d
+d Requires: Stata version 14 and Python 3 for catalog scraping
+d
+d Distribution-Date: 20260607
+d
+d Author: Eric Booth, Texas 2036
+d Support: email eric.booth@texas2036.org
+d
+f scrapessc.ado
+f scrapessc_readpkglist.ado
+f scrapessc.sthlp
+f scrapessc.py
+f scrapessc_demo.do
+f README.md
