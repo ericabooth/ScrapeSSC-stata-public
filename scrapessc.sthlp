@@ -193,5 +193,5 @@ Install after explicit confirmation:
 {pstd}
 Eric Booth
 Sr Researcher, Texas 2036
-eric.booth@texas2036.org / eric.a.booth@gmail.com 
+eric.a.booth@gmail.com / eric.a.booth@gmail.com 
 

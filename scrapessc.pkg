@@ -15,8 +15,8 @@ d Requires: Stata version 14 and Python 3 for catalog scraping
 d
 d Distribution-Date: 20260607
 d
-d Author: Eric Booth, Texas 2036
-d Support: email eric.booth@texas2036.org
+d Author: Eric A. Booth, Sr Researcher, Texas2036.org
+d Support: eric.a.booth@gmail.com
 d
 f scrapessc.ado
 f scrapessc_readpkglist.ado

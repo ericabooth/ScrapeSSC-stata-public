@@ -24,20 +24,13 @@ README.md                  GitHub README
 
 ## Install From GitHub
 
-After pushing this folder to a GitHub repository, install from Stata with:
-
 ```stata
-net install scrapessc, from("https://raw.githubusercontent.com/ericabooth/scrapessc/main") replace
-```
-
-For local development:
-
-```stata
-cd "/path/to/scrapessc"
-adopath ++ "`c(pwd)'"
+net install scrapessc, from("https://raw.githubusercontent.com/ericbooth/scrapessc-stata/master/") replace
 which scrapessc
 help scrapessc
 ```
+
+`scrapessc.pkg` and `stata.toc` ship with the package, so Stata's installer picks up every file in one call.
 
 ## Run The Fast Python Scraper Directly
 
@@ -183,3 +176,7 @@ STB and Stata Journal software directories are designed to be viewed through Sta
 - `replace` is opt-in.
 - `all` is opt-in because auxiliary files are usually copied to the current working directory.
 - Generated catalogs should not be committed unless you intentionally want a snapshot in the repository.
+
+## Author
+
+Eric A. Booth, Sr Researcher, Texas2036.org (eric.a.booth@gmail.com).
