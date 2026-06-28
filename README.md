@@ -25,7 +25,7 @@ README.md                  GitHub README
 ## Install From GitHub
 
 ```stata
-net install scrapessc, from("https://raw.githubusercontent.com/ericbooth/scrapessc-stata/master/") replace
+net install scrapessc, from("https://raw.githubusercontent.com/ericabooth/scrapessc-stata/master/") replace
 which scrapessc
 help scrapessc
 ```
