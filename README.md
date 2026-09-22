@@ -25,7 +25,8 @@ README.md                  GitHub README
 ## Install From GitHub
 
 ```stata
-net install scrapessc, from("https://raw.githubusercontent.com/ericabooth/scrapessc-stata/master/") replace
+net install scrapessc, from("https://raw.githubusercontent.com/ericabooth/ScrapeSSC-stata-public/main/") replace force
+discard
 which scrapessc
 help scrapessc
 ```
@@ -179,4 +180,4 @@ STB and Stata Journal software directories are designed to be viewed through Sta
 
 ## Author
 
-Eric A. Booth, Sr Researcher, Texas2036.org (eric.a.booth@gmail.com).
+Eric A. Booth, Sr Researcher, Texas 2036 (eric.a.booth@gmail.com).
