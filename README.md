@@ -2,7 +2,7 @@
 
 `scrapessc` is a small Stata/Python package for building a local catalog of SSC package metadata and for listing/installing user-written packages from SSC, STB, and Stata Journal software archives.
 
-#This is primarily useful for setting up an air-gapped machine that cannot download or access ado files from SSC, Stata Journal, or STB regularly.
+This is primarily useful for setting up an air-gapped machine that cannot download or access ado files from SSC, Stata Journal, or STB regularly.
 
 It has two pieces:
 
@@ -82,7 +82,21 @@ scrapessc catalog, source(ssc) script("/path/to/scrapessc.py") outdir("ssc_catal
 A leading `~` in `python()`, `script()`, or `outdir()` is expanded from your home
 folder, including the `~/...` path that `findfile` reports under the default PLUS
 folder. If Python does not run or does not finish, `scrapessc catalog` stops with
-error 498 instead of returning as if it had worked.
+error 498 instead of returning as if it had worked. `letters()` may be given with
+or without quotes. On Windows the default interpreter is `python` (elsewhere
+`python3`). A bare `scrapessc` with no subcommand runs `catalog`, which scrapes all
+of SSC into `scrapessc_catalog/` in the working folder.
+
+`catalog.csv` keeps each multi-line manifest in one quoted field, so read it with
+`bindquote(strict)`:
+
+```stata
+import delimited using "ssc_catalog/catalog.csv", varnames(1) bindquote(strict) encoding("utf-8") clear
+```
+
+Package names in the catalog keep the case of each manifest's title line (often
+upper case, as in the SSC hits data); `list` returns the lower-case names that
+`ssc install` uses.
 
 ## SSC Hit Counts
 
@@ -104,7 +118,7 @@ List packages from Stata's own package menus:
 ```stata
 scrapessc list, source(ssc) letters(a) saving("ssc_a_packages.csv")
 scrapessc list, source(stb) stbissues(1/5) saving("stb_1_5_packages.csv")
-scrapessc list, source(sj) sjvolumes(23/25) sjiissues(1/4)
+scrapessc list, source(sj) sjvolumes(23/25) sjissues(1/4)
 ```
 
 Preview installation commands without changing your Stata setup:
@@ -122,8 +136,12 @@ scrapessc install, source(ssc) letters(z) confirm
 Install auxiliary files only if you explicitly want them copied to the working directory:
 
 ```stata
-scrapessc install, source(sj) sjvolumes(25) sjiissues(1) confirm all
+scrapessc install, source(sj) sjvolumes(25) sjissues(1) confirm all
 ```
+
+`sjissues()` was spelled `sjiissues()` before 0.1.2; the old spelling still works.
+`list` and `install` capture each STB/SJ menu through a privately named log, so they
+also work while your own log is open.
 
 Overwrite existing installed packages only if you explicitly request it:
 
@@ -185,6 +203,7 @@ STB and Stata Journal software directories are designed to be viewed through Sta
 
 ## Changelog
 
+- **0.1.2 (9 Nov 2026):** `catalog` accepts quoted `letters()` lists (they were passed with doubled quotes and broke the Python call), notes and ignores the STB/SJ options it never used, and on Windows defaults to `python` and wraps the shell line so `cmd.exe` keeps its quotes. `scrapessc.py` expands a leading `~` in `--outdir`. `list` and `install` capture menus through a privately named log, so they no longer stop with `r(604)` while an unnamed user log is open, and each STB/SJ menu prints once. New option name `sjissues()`; `sjiissues()` still works.
 - **0.1.1 (9 Nov 2026):** `catalog` expands a leading `~` in `python()`, `script()`, and `outdir()`. Before, under the default macOS or Linux PLUS folder the shell passed `~/.../scrapessc.py` to Python unexpanded, Python could not open it, and the command still returned 0 with `r(outdir)` set. `catalog` now checks that the scraper finished (it writes a marker through the new `--done-file` argument) and stops with error 498 when it did not.
 - **0.1.0 (7 Jun 2026):** first release.
 

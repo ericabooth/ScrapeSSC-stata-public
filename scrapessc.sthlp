@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.1.1 09nov2026}{...}
+{* *! version 0.1.2 09nov2026}{...}
 {viewerjumpto "Syntax" "scrapessc##syntax"}{...}
 {viewerjumpto "Description" "scrapessc##description"}{...}
 {viewerjumpto "Examples" "scrapessc##examples"}{...}
@@ -25,12 +25,15 @@ Fast Python-backed catalog scrape:
 {opt python(path)}
 {opt script(path)}
 {opt letters(a b _)}
-{opt stbissues(numlist)}
-{opt sjvolumes(numlist)}
-{opt sjiissues(numlist)}
 {opt raw}
 {opt workers(#)}
 ]
+
+{pstd}
+{cmd:catalog} is also what runs when {cmd:scrapessc} is typed with no subcommand
+(or with only options), so a bare {cmd:scrapessc} starts a full SSC scrape into
+{cmd:scrapessc_catalog} in the working folder. The default {opt outdir()} is
+{cmd:scrapessc_catalog} under the working folder.
 
 {pstd}
 SSC hit counts over time:
@@ -58,7 +61,7 @@ List packages available from Stata's net/ssc menus:
 {opt letters(a b _)}
 {opt stbissues(numlist)}
 {opt sjvolumes(numlist)}
-{opt sjiissues(numlist)}
+{opt sjissues(numlist)}
 {opt saving(filename)}
 ]
 
@@ -72,7 +75,7 @@ Install packages from SSC, STB, or SJ:
 {opt letters(a b _)}
 {opt stbissues(numlist)}
 {opt sjvolumes(numlist)}
-{opt sjiissues(numlist)}
+{opt sjissues(numlist)}
 {opt dryrun}
 {opt confirm}
 {opt all}
@@ -107,7 +110,22 @@ spaces, and may start with {cmd:~}, which {cmd:scrapessc} expands from your home
 folder. By default the script is the {cmd:scrapessc.py} installed with the
 package. If the Python program does not run or does not finish (for example, a
 wrong {opt python()} path), {cmd:scrapessc catalog} stops with error 498 rather
-than returning as if it had worked.
+than returning as if it had worked. {opt letters()} may be given with or
+without quotes, for example {cmd:letters(a b)} or {cmd:letters("a b")}. On
+Windows the default {opt python()} is {cmd:python}; elsewhere it is {cmd:python3}.
+
+{pstd}
+{cmd:catalog.csv} stores each package's full manifest, which spans several lines,
+in one quoted field. Read it with {cmd:bindquote(strict)} so each package stays on
+one row:
+
+{phang2}
+{cmd:. import delimited using "ssc_catalog/catalog.csv", varnames(1) bindquote(strict) encoding("utf-8") clear}
+
+{pstd}
+Package names in the catalog keep the case used in each manifest's title line
+(often upper case, as in the SSC hits data), while {cmd:list} returns the lower-case
+names that {cmd:ssc install} uses. Compare them with {cmd:lower()}.
 
 {pstd}
 {cmd:scrapessc hits} is modeled on {cmd:ssccount}. It downloads the same
@@ -122,6 +140,10 @@ because those software directories are designed to be viewed with Stata's
 {cmd:net} command rather than ordinary browser scraping. These routines are
 intentionally conservative. {cmd:install} defaults to a dry run unless
 {cmd:confirm} is supplied, and it never uninstalls or deletes existing packages.
+{opt sjissues()} picks the issues within each {opt sjvolumes()} volume (default
+{cmd:1/4}); the older spelling {opt sjiissues()} is still accepted. Each STB or SJ
+menu is captured through a privately named log, so these routines also work while
+your own log is open.
 
 
 {marker examples}{...}
@@ -161,7 +183,7 @@ List SSC packages beginning with {cmd:a} and save the package names:
 Preview installation commands without installing:
 
 {phang2}
-{cmd:. scrapessc install, source(sj) sjvolumes(23) sjiissues(1) dryrun}
+{cmd:. scrapessc install, source(sj) sjvolumes(23) sjissues(1) dryrun}
 
 {pstd}
 Install after explicit confirmation:
@@ -196,10 +218,21 @@ Install after explicit confirmation:
 {synopt:{cmd:r(saving)}}saved dataset, if specified{p_end}
 
 
+{title:Changes}
+
+{pstd}0.1.2 (09nov2026): {cmd:catalog} accepts quoted {opt letters()}, ignores the
+STB/SJ options with a note, and on Windows defaults to {cmd:python} and keeps the
+shell line's quotes. {cmd:list} and {cmd:install} work while a user log is open and
+print each STB/SJ menu once. New option name {opt sjissues()}.
+
+{pstd}0.1.1 (09nov2026): {cmd:catalog} expands a leading {cmd:~} and stops with
+error 498 when the scraper does not finish.
+
+
 {title:Author}
 
 {pstd}
 Eric Booth
 Sr Researcher, Texas 2036
-eric.a.booth@gmail.com / eric.a.booth@gmail.com 
+eric.a.booth@gmail.com
 

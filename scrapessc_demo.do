@@ -10,7 +10,7 @@ adopath ++ "`c(pwd)'"
 which scrapessc
 
 * Fast Python-backed scrape of a small SSC subset.
-scrapessc catalog, source(ssc) letters(a b) outdir("demo_catalog") script("scrapessc.py")
+scrapessc catalog, source(ssc) letters(a b) outdir("demo_catalog")
 
 * Stata-only package list retrieval using ssc describe and SMCL parsing.
 scrapessc list, source(ssc) letters(a) saving("demo_ssc_a_packages.csv")

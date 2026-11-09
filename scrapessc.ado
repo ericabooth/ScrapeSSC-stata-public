@@ -1,5 +1,14 @@
-*! version 0.1.1 09nov2026
+*! version 0.1.2 09nov2026
 *! Eric A. Booth
+* 0.1.2 09nov2026: catalog takes letters() with or without quotes (quoted
+*       lists such as letters("q r") were passed with doubled quotes and
+*       broke the Python call); catalog notes and ignores the STB/SJ options,
+*       which it never used; on Windows the default interpreter is python and
+*       the shell line is wrapped so cmd.exe keeps its quotes. list and
+*       install open their capture log under a private name, so they work
+*       while an unnamed user log is open (was r(604)), and each STB/SJ menu
+*       prints once. New option name sjissues(); the old sjiissues() still
+*       works.
 * 0.1.1 09nov2026: catalog expands a leading ~ in script(), python() and
 *       outdir() (findfile returns ~/... under the default PLUS, which the
 *       shell then passed to Python unexpanded); catalog now checks that the
@@ -47,8 +56,8 @@ end
 program define _scrapessc_catalog, rclass
     version 14.0
     syntax [, SOURCE(string) OUTdir(string) PYthon(string) ///
-        SCRIPT(string) LETTERS(string asis) STBIssues(string asis) ///
-        SJVolumes(string asis) SJIissues(string asis) ALL RAW WORKers(integer 16) ]
+        SCRIPT(string) LETTERS(string) STBIssues(string) ///
+        SJVolumes(string) SJIssues(string) sjiissues(string) ALL RAW WORKers(integer 16) ]
 
     if `"`source'"' == "" local source "ssc"
     if "`all'" != "" local source "all"
@@ -59,8 +68,16 @@ program define _scrapessc_catalog, rclass
         exit 198
     }
 
+    if `"`stbissues'`sjvolumes'`sjissues'`sjiissues'"' != "" {
+        di as text "note: stbissues(), sjvolumes() and sjissues() apply to list and install; catalog ignores them"
+    }
+
+    local iswin = ("`c(os)'" == "Windows")
     if `"`outdir'"' == "" local outdir "`c(pwd)'/scrapessc_catalog"
-    if `"`python'"' == "" local python "python3"
+    if `"`python'"' == "" {
+        if `iswin' local python "python"
+        else local python "python3"
+    }
     if `"`script'"' == "" {
         capture findfile scrapessc.py
         if _rc {
@@ -89,12 +106,12 @@ program define _scrapessc_catalog, rclass
 
     local cmd `""`python'" "`script'" catalog --source `source' --outdir "`outdir'" --workers `workers' --done-file "`donefile'""'
     if `"`letters'"' != "" local cmd `"`cmd' --letters "`letters'""'
-    if `"`stbissues'"' != "" local cmd `"`cmd' --stb-issues "`stbissues'""'
-    if `"`sjvolumes'"' != "" local cmd `"`cmd' --sj-volumes "`sjvolumes'""'
-    if `"`sjiissues'"' != "" local cmd `"`cmd' --sj-issues "`sjiissues'""'
     if "`raw'" != "" local cmd `"`cmd' --raw"'
 
     di as text `"running: `cmd'"'
+    * cmd.exe strips the first and last quote of a line that starts with a
+    * quote and holds more than two, so wrap the whole line in one more pair
+    if `iswin' local cmd `""`cmd'""'
     capture noisily shell `cmd'
     if _rc {
         di as error "Python scraper returned error code " _rc
@@ -139,10 +156,12 @@ end
 program define _scrapessc_list, rclass
     version 14.0
     syntax [, SOURCE(string) LETTERS(string asis) STBIssues(numlist integer) ///
-        SJVolumes(numlist integer) SJIissues(numlist integer) SAVing(string) ]
+        SJVolumes(numlist integer) SJIssues(numlist integer) sjiissues(numlist integer) ///
+        SAVing(string) ]
+    if "`sjissues'" == "" local sjissues "`sjiissues'"
 
     _scrapessc_package_loop, mode(list) source(`"`source'"') letters(`"`letters'"') ///
-        stbissues(`"`stbissues'"') sjvolumes(`"`sjvolumes'"') sjiissues(`"`sjiissues'"') ///
+        stbissues(`"`stbissues'"') sjvolumes(`"`sjvolumes'"') sjissues(`"`sjissues'"') ///
         saving(`"`saving'"')
     return add
 end
@@ -151,8 +170,9 @@ end
 program define _scrapessc_install, rclass
     version 14.0
     syntax [, SOURCE(string) LETTERS(string asis) STBIssues(numlist integer) ///
-        SJVolumes(numlist integer) SJIissues(numlist integer) DRYrun CONFIRM ///
-        REPLACE ALL SAVing(string) ]
+        SJVolumes(numlist integer) SJIssues(numlist integer) sjiissues(numlist integer) ///
+        DRYrun CONFIRM REPLACE ALL SAVing(string) ]
+    if "`sjissues'" == "" local sjissues "`sjiissues'"
 
     if "`confirm'" == "" {
         local dryrun "dryrun"
@@ -160,7 +180,7 @@ program define _scrapessc_install, rclass
     }
 
     _scrapessc_package_loop, mode(install) source(`"`source'"') letters(`"`letters'"') ///
-        stbissues(`"`stbissues'"') sjvolumes(`"`sjvolumes'"') sjiissues(`"`sjiissues'"') ///
+        stbissues(`"`stbissues'"') sjvolumes(`"`sjvolumes'"') sjissues(`"`sjissues'"') ///
         saving(`"`saving'"') `dryrun' `replace' `all'
     return add
 end
@@ -170,7 +190,7 @@ program define _scrapessc_package_loop, rclass
     version 14.0
     syntax , MODE(string) [ SOURCE(string) LETTERS(string asis) ///
         STBIssues(numlist integer) SJVolumes(numlist integer) ///
-        SJIissues(numlist integer) SAVing(string) DRYrun REPLACE ALL ]
+        SJIssues(numlist integer) SAVing(string) DRYrun REPLACE ALL ]
 
     if `"`source'"' == "" local source "ssc"
     local source = lower(`"`source'"')
@@ -211,11 +231,8 @@ program define _scrapessc_package_loop, rclass
     if inlist(`"`source'"', "stb", "all") {
         if `"`stbissues'"' == "" local stbissues "1/61"
         foreach issue of numlist `stbissues' {
-            capture noisily net from http://www.stata.com/stb/stb`issue'/
-            if _rc == 0 {
-                log using `"`pkgsmcl'"', replace smcl
-                net from http://www.stata.com/stb/stb`issue'/
-                log close
+            _scrapessc_netfrom http://www.stata.com/stb/stb`issue'/, smcl(`"`pkgsmcl'"')
+            if r(rc) == 0 {
                 scrapessc_readpkglist `"`pkgsmcl'"'
                 local these `"`r(pkglist)'"'
                 foreach pkg of local these {
@@ -237,15 +254,12 @@ program define _scrapessc_package_loop, rclass
             local current_vol = `current_year' - 2000
             local sjvolumes "1/`current_vol'"
         }
-        if `"`sjiissues'"' == "" local sjiissues "1/4"
+        if `"`sjissues'"' == "" local sjissues "1/4"
         foreach vol of numlist `sjvolumes' {
-            foreach issue of numlist `sjiissues' {
+            foreach issue of numlist `sjissues' {
                 local sjurl "http://www.stata-journal.com/software/sj`vol'-`issue'/"
-                capture noisily net from `sjurl'
-                if _rc == 0 {
-                    log using `"`pkgsmcl'"', replace smcl
-                    net from `sjurl'
-                    log close
+                _scrapessc_netfrom `sjurl', smcl(`"`pkgsmcl'"')
+                if r(rc) == 0 {
                     scrapessc_readpkglist `"`pkgsmcl'"'
                     local these `"`r(pkglist)'"'
                     foreach pkg of local these {
@@ -269,6 +283,20 @@ program define _scrapessc_package_loop, rclass
     return scalar errors = `nerrors'
     di as text "packages found: " as result `nfound'
     if `"`mode'"' == "install" di as text "install errors: " as result `nerrors'
+end
+
+
+* Show one net-from menu and capture it to a SMCL file. The capture log has
+* its own name, so an unnamed log the user already has open is not touched.
+program define _scrapessc_netfrom, rclass
+    version 14.0
+    syntax anything(name=url), SMCL(string)
+    capture log close _scrapessc
+    quietly log using `"`smcl'"', replace smcl name(_scrapessc)
+    capture noisily net from `url'
+    local rc = _rc
+    quietly log close _scrapessc
+    return scalar rc = `rc'
 end
 
 

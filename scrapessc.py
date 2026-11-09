@@ -309,7 +309,7 @@ def parse_letters(value: str | None) -> list[str] | None:
 
 
 def run_catalog(args: argparse.Namespace) -> int:
-    outdir = Path(args.outdir)
+    outdir = Path(args.outdir).expanduser()
     outdir.mkdir(parents=True, exist_ok=True)
     raw_dir = outdir / "raw_pkg" if args.raw else None
     if raw_dir:
@@ -360,7 +360,7 @@ def run_catalog(args: argparse.Namespace) -> int:
     print(f"Wrote catalog outputs to {outdir}", file=sys.stderr)
     if args.done_file:
         # completion marker read by scrapessc.ado (shell does not pass back exit codes)
-        Path(args.done_file).write_text("done\n", encoding="utf-8")
+        Path(args.done_file).expanduser().write_text("done\n", encoding="utf-8")
     return 0 if not errors else 1
 
 
