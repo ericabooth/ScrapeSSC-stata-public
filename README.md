@@ -79,6 +79,11 @@ If Stata cannot find the Python file, pass it explicitly:
 scrapessc catalog, source(ssc) script("/path/to/scrapessc.py") outdir("ssc_catalog")
 ```
 
+A leading `~` in `python()`, `script()`, or `outdir()` is expanded from your home
+folder, including the `~/...` path that `findfile` reports under the default PLUS
+folder. If Python does not run or does not finish, `scrapessc catalog` stops with
+error 498 instead of returning as if it had worked.
+
 ## SSC Hit Counts
 
 The `hits` subcommand mirrors the core use case of `ssccount`: it downloads monthly SSC hit-count datasets, optionally filters by author/package, and can save or graph results.
@@ -177,6 +182,11 @@ STB and Stata Journal software directories are designed to be viewed through Sta
 - `replace` is opt-in.
 - `all` is opt-in because auxiliary files are usually copied to the current working directory.
 - Generated catalogs should not be committed unless you intentionally want a snapshot in the repository.
+
+## Changelog
+
+- **0.1.1 (9 Nov 2026):** `catalog` expands a leading `~` in `python()`, `script()`, and `outdir()`. Before, under the default macOS or Linux PLUS folder the shell passed `~/.../scrapessc.py` to Python unexpanded, Python could not open it, and the command still returned 0 with `r(outdir)` set. `catalog` now checks that the scraper finished (it writes a marker through the new `--done-file` argument) and stops with error 498 when it did not.
+- **0.1.0 (7 Jun 2026):** first release.
 
 ## Author
 

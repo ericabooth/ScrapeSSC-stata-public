@@ -358,6 +358,9 @@ def run_catalog(args: argparse.Namespace) -> int:
     write_jsonl(records, outdir / "catalog.jsonl")
     write_summary(records, errors, outdir, time.perf_counter() - start)
     print(f"Wrote catalog outputs to {outdir}", file=sys.stderr)
+    if args.done_file:
+        # completion marker read by scrapessc.ado (shell does not pass back exit codes)
+        Path(args.done_file).write_text("done\n", encoding="utf-8")
     return 0 if not errors else 1
 
 
@@ -377,6 +380,7 @@ def build_parser() -> argparse.ArgumentParser:
     catalog.add_argument("--workers", type=int, default=16)
     catalog.add_argument("--progress", type=int, default=250)
     catalog.add_argument("--raw", action="store_true", help="save raw .pkg manifests")
+    catalog.add_argument("--done-file", help="write this file once all outputs are written")
     catalog.set_defaults(func=run_catalog)
     return parser
 

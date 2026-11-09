@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.1.0 07jun2026}{...}
+{* *! version 0.1.1 09nov2026}{...}
 {viewerjumpto "Syntax" "scrapessc##syntax"}{...}
 {viewerjumpto "Description" "scrapessc##description"}{...}
 {viewerjumpto "Examples" "scrapessc##examples"}{...}
@@ -102,6 +102,14 @@ the linked {cmd:.pkg} manifests concurrently. The Python scraper writes
 {cmd:catalog.csv}, {cmd:catalog.jsonl}, {cmd:summary.md}, and count files.
 
 {pstd}
+{opt python()}, {opt script()}, and {opt outdir()} may be quoted, may contain
+spaces, and may start with {cmd:~}, which {cmd:scrapessc} expands from your home
+folder. By default the script is the {cmd:scrapessc.py} installed with the
+package. If the Python program does not run or does not finish (for example, a
+wrong {opt python()} path), {cmd:scrapessc catalog} stops with error 498 rather
+than returning as if it had worked.
+
+{pstd}
 {cmd:scrapessc hits} is modeled on {cmd:ssccount}. It downloads the same
 monthly SSC hit-count datasets used by {cmd:ssc hot}, optionally filters by
 author or package, and can save or graph the resulting data.
@@ -169,7 +177,7 @@ Install after explicit confirmation:
 {cmd:scrapessc catalog} stores:
 
 {synoptset 20 tabbed}{...}
-{synopt:{cmd:r(outdir)}}output directory{p_end}
+{synopt:{cmd:r(outdir)}}output directory (set only when the scraper finished){p_end}
 {synopt:{cmd:r(source)}}requested source{p_end}
 
 {pstd}

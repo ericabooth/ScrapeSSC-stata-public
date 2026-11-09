@@ -1,4 +1,11 @@
-*! version 0.1.0 07jun2026
+*! version 0.1.1 09nov2026
+*! Eric A. Booth
+* 0.1.1 09nov2026: catalog expands a leading ~ in script(), python() and
+*       outdir() (findfile returns ~/... under the default PLUS, which the
+*       shell then passed to Python unexpanded); catalog now checks that the
+*       Python scraper actually finished and errors (r(498)) when it did not,
+*       instead of returning 0 with r(outdir) set
+* 0.1.0 07jun2026: first release
 
 program define scrapessc, rclass
     version 14.0
@@ -39,8 +46,8 @@ end
 
 program define _scrapessc_catalog, rclass
     version 14.0
-    syntax [, SOURCE(string) OUTdir(string asis) PYthon(string asis) ///
-        SCRIPT(string asis) LETTERS(string asis) STBIssues(string asis) ///
+    syntax [, SOURCE(string) OUTdir(string) PYthon(string) ///
+        SCRIPT(string) LETTERS(string asis) STBIssues(string asis) ///
         SJVolumes(string asis) SJIissues(string asis) ALL RAW WORKers(integer 16) ]
 
     if `"`source'"' == "" local source "ssc"
@@ -60,10 +67,27 @@ program define _scrapessc_catalog, rclass
             di as error "could not find scrapessc.py; specify script(path)"
             exit 601
         }
-        local script "`r(fn)'"
+        local script `"`r(fn)'"'
     }
 
-    local cmd `""`python'" "`script'" catalog --source `source' --outdir "`outdir'" --workers `workers'"'
+    * The shell does not expand a ~ inside double quotes, and findfile returns
+    * ~/... when PLUS is the default ~/Library/.../plus/ or ~/ado/plus/
+    foreach opt in script python outdir {
+        _scrapessc_tilde `"``opt''"'
+        local `opt' `"`r(path)'"'
+    }
+    capture confirm file `"`script'"'
+    if _rc {
+        di as error `"scrapessc.py not found at `script'"'
+        exit 601
+    }
+
+    * Python's exit status does not come back through -shell-, so the
+    * scraper writes this marker as its last step and Stata checks for it
+    tempfile donefile
+    capture erase `"`donefile'"'
+
+    local cmd `""`python'" "`script'" catalog --source `source' --outdir "`outdir'" --workers `workers' --done-file "`donefile'""'
     if `"`letters'"' != "" local cmd `"`cmd' --letters "`letters'""'
     if `"`stbissues'"' != "" local cmd `"`cmd' --stb-issues "`stbissues'""'
     if `"`sjvolumes'"' != "" local cmd `"`cmd' --sj-volumes "`sjvolumes'""'
@@ -76,9 +100,39 @@ program define _scrapessc_catalog, rclass
         di as error "Python scraper returned error code " _rc
         exit _rc
     }
+    capture confirm file `"`donefile'"'
+    if _rc {
+        di as error "the Python scraper did not finish; no catalog was written"
+        di as error `"check python() (now `python') and the messages above"'
+        exit 498
+    }
+    capture erase `"`donefile'"'
 
     return local outdir `"`outdir'"'
     return local source `"`source'"'
+end
+
+
+program define _scrapessc_tilde, rclass
+    version 14.0
+    args path
+    if substr(`"`path'"', 1, 1) == "~" & inlist(substr(`"`path'"', 2, 1), "", "/", "\\") {
+        local home : env HOME
+        if "`c(os)'" == "Windows" {
+            local up : env USERPROFILE
+            local hd : env HOMEDRIVE
+            local hp : env HOMEPATH
+            if `"`up'"' != "" local home `"`up'"'
+            else if `"`hd'`hp'"' != "" local home `"`hd'`hp'"'
+        }
+        if `"`home'"' == "" {
+            di as error "cannot expand ~: HOME is not set"
+            exit 601
+        }
+        local rest = substr(`"`path'"', 2, .)
+        local path `"`home'`rest'"'
+    }
+    return local path `"`path'"'
 end
 
 
