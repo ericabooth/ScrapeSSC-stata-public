@@ -96,7 +96,9 @@ import delimited using "ssc_catalog/catalog.csv", varnames(1) bindquote(strict) 
 
 Package names in the catalog keep the case of each manifest's title line (often
 upper case, as in the SSC hits data); `list` returns the lower-case names that
-`ssc install` uses.
+`ssc install` uses. From 0.1.3 the catalog also has a `pkgname` column with the
+lower-case name, so you can match catalog rows to `list` output or `ssc install`
+without changing `package`.
 
 ## SSC Hit Counts
 

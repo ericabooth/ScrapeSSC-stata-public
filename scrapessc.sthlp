@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 0.1.2 09nov2026}{...}
+{* *! version 0.1.3 10nov2026}{...}
 {viewerjumpto "Syntax" "scrapessc##syntax"}{...}
 {viewerjumpto "Description" "scrapessc##description"}{...}
 {viewerjumpto "Examples" "scrapessc##examples"}{...}
@@ -125,7 +125,9 @@ one row:
 {pstd}
 Package names in the catalog keep the case used in each manifest's title line
 (often upper case, as in the SSC hits data), while {cmd:list} returns the lower-case
-names that {cmd:ssc install} uses. Compare them with {cmd:lower()}.
+names that {cmd:ssc install} uses. From version 0.1.3 the catalog also has a
+{cmd:pkgname} column holding the lower-case name, so you can match catalog rows to
+{cmd:list} output or {cmd:ssc install} directly; {cmd:package} keeps its case.
 
 {pstd}
 {cmd:scrapessc hits} is modeled on {cmd:ssccount}. It downloads the same

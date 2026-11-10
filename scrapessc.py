@@ -177,6 +177,7 @@ def parse_pkg(text: str, url: str, source: str) -> dict[str, object]:
     return {
         "source": source,
         "package": package,
+        "pkgname": package.lower(),
         "pkg_file": pkg_file,
         "archive_dir": archive_dir,
         "title": title,
@@ -213,6 +214,7 @@ def write_csv(records: list[dict[str, object]], path: Path) -> None:
     fields = [
         "source",
         "package",
+        "pkgname",
         "pkg_file",
         "archive_dir",
         "title",

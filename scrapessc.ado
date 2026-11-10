@@ -1,5 +1,7 @@
-*! version 0.1.2 09nov2026
+*! version 0.1.3 10nov2026
 *! Eric A. Booth
+* 0.1.3 10nov2026: catalog.csv and catalog.jsonl gain a lower-case pkgname
+*   column beside package (whose case is unchanged).
 * 0.1.2 09nov2026: catalog takes letters() with or without quotes (quoted
 *       lists such as letters("q r") were passed with doubled quotes and
 *       broke the Python call); catalog notes and ignores the STB/SJ options,
